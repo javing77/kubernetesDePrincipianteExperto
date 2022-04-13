@@ -292,3 +292,15 @@ kube-system       Active       11h
 ```
 
 ## Modulo 9 - Authentication, Authorization, and Admission Control
+Para acceder a los recursos de Kubernetes o a los objetos del cluster, necesitamos acceder aun endpoint del servidor de la API.  Cada petición pasa por los siguientes etapas de control de acceso.
+
+
+    Authentication
+        Logs in a user.
+    Authorization
+        Authorizes the API requests submitted by the authenticated user.
+    Admission Control
+        Software modules that validate and/or modify user requests based.
+
+Kubernetes no tiene un objeto especial para los USER. Pero a pesar de eso puede almacenar los usernames para la fase de Autenticación .
+
