@@ -304,3 +304,20 @@ Para acceder a los recursos de Kubernetes o a los objetos del cluster, necesitam
 
 Kubernetes no tiene un objeto especial para los USER. Pero a pesar de eso puede almacenar los usernames para la fase de Autenticación .
 
+### Modulo 10 - Services
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+```
+
+
+### Modulo 11 - Deploying a Stan-Alone application 
