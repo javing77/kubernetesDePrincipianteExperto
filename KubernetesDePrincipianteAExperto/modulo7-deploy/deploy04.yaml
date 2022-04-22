@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: front 
+  annotations:
+    kubernetes.io/change-cause: "Este genera un deployment con errores en la creacion del pod"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: front-nginx
+  template:
+    metadata:
+      labels:
+        app: front-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:NoExiste
+        ports:
+        - containerPort: 8080

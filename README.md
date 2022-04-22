@@ -205,7 +205,7 @@ En realidad, esto quiere decir que puede que nunca necesites manipular los objet
 
 [Más información de ReplicaSets](https://kubernetes.io/es/docs/concepts/workloads/controllers/replicaset/)
 
-[Ejemplo-RS](modulo6-rs/rs-01.yaml)
+[Ejemplo-RS](KubernetesDePrincipianteAExperto/modulo6-rs/rs-01.yaml)
 
 ```
 kubectl apply -f modulo6-rs/rs-01.yaml
@@ -220,7 +220,7 @@ Para saber quien es el dueño (owner) de un pod, podemos generar información de
 ```
 kubectl get po rs-frontend-xt7jr -o yaml > modulo6-rs/informacionPod1.yaml
 ```
-[modulo6/informacionPod1.yaml](modulo6-rs/informacionPod1.yaml)
+[modulo6/informacionPod1.yaml](KubernetesDePrincipianteAExperto/modulo6-rs/informacionPod1.yaml)
 
 
 a consultar el archivo generado podemos encontrar en la parte de la metada la si
@@ -250,10 +250,11 @@ _Nota: En caso que un pod no tenga de tenga ownerReference pero tenga el mismo l
 
 ```
 kubectl label pod pruebapod1 tier=frontend
+kubectl get po --show-labels pruebapod1
 ```
 
 ### Validar la nota anterior 
-1. creamos una archivo yaml [modulo6-rs/rs-02.yaml](modulo6-rs/rs-02.yaml) este manifiesto es de nuevo RS
+1. creamos una archivo yaml [modulo6-rs/rs-02.yaml](KubernetesDePrincipianteAExperto/modulo6-rs/rs-02.yaml) este manifiesto es de nuevo RS
 2. Creamos un pod manualmente.
     ```
     kubectl run pruebapod1 --image=nginx:alpine
@@ -283,3 +284,140 @@ kubectl apply -f modulo6-rs/rs-02.yaml
 
 ### Problemas de ReplicaSets.
 En caso de realizar un cambio del manifiesto en la parte de los template ejemplo se cambia la versión de la imagen y aplicamos el manifiesto no va a ocurrir nada. Esto porque el RS solo mira que se cumpla la cantidad de pods solicitados. Excepto a que se force eliminando uno de los pods.
+
+## Módulo 7 - Deployments
+
+## Deployment
+
+Un controlador de Deployment proporciona actualizaciones declarativas para los Pods y los ReplicaSets.
+
+Cuando describes el estado deseado en un objeto Deployment, el controlador del Deployment se encarga de cambiar el estado actual al estado deseado de forma controlada. Puedes definir Deployments para crear nuevos ReplicaSets, o eliminar Deployments existentes y adoptar todos sus recursos con nuevos Deployments.
+
+[Más información de Deployments](https://kubernetes.io/es/docs/concepts/workloads/controllers/deployment/)
+
+### Creando un deployment
+
+Un archivo de manimiento sus promera lineas deben ser apiVersion: apps/v1 kind: Deployment.
+
+[Ejemplo-Deployment](KubernetesDePrincipianteAExperto/modulo7-deploy/deploy01.yaml)
+
+1. Realizar el deploy del Deployent
+```
+kubectl apply -f modulo7-deploy/deploy01.yaml
+kubectl get deploy
+```
+
+2. Validar los labels que tenga este deployment
+```
+kubectl get deployment --show-labels nginx-deployment
+```
+
+3. Ver el estados del deployment
+```
+kubectl rollout status deployment nginx-deployment
+```
+
+4. Validar  la existencia de los pods con --show-labels
+```
+kubectl get po --show-labels
+```
+
+5. A diferencia cuando se trabajó solo con el RS este no tenia un metada.ownerReferences pero como este RS fue creado con un Deployment este si cuenta con un metada.ownerReferences
+
+```
+kubectl get rs nginx-deployment-b9d465bf -o yaml
+```
+
+### Actualizar un Deployment para que este actualice sus PODs
+
+Para este caso se actualizara la version del nginx pasandola a ser alpine
+[modulo7-deploy/deploy02.yaml](KubernetesDePrincipianteAExperto/modulo7-deploy/deploy02.yaml)
+
+```
+kubectl apply -f modulo7-deploy/deploy02.yaml
+```
+
+Al aplicar este nuevo manifiesto, causará que los pod inicien a actualizarce uno a uno.
+Para ver en tiempo real lo que está pasando 
+
+```
+kubectl rollout status deployment nginx-deployment
+```
+
+Obtener mas información del proceso del deployement
+```
+kubectl describe deployment nginx-deployment
+```
+
+[Más Información de RollOut](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
+
+### Ver los rollout hechos a un deployment
+Estos son básicamento nos dá información de los RS  que se han creado
+```
+kubectl rollout history deployment nginx-deployment
+```
+
+Esto se hace para poder regresar aun estado anterior. Por defecto se puede mantener hasta 10 de historico. Esto se puede cambiar en archivo de manifiesto con el parámentro __spec. revisionHistoryLimit: 5__
+
+Es practico usar Change-Cause para que actualice los history quede el caso de actualizacion hay 3 formas
+
+1. Usando el parámetro --record  el cuarda guarda cual fue el comando que se ejecutó **NOTA: ESTA OPCION ESTA MARCADA COMO DEPRECATED**
+```
+kubectl apply -f modulo7-deploy/deploy02.yaml --record
+kubectl rollout history deployment nginx-deployment
+``` 
+
+2. Usnado metadata.annotations.kubernetes.io/change-cause: Ejemplo
+
+[modulo7-deploy/deploy03.yaml](KubernetesDePrincipianteAExperto/modulo7-deploy/deploy03.yaml)
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: front
+  annotations:
+    kubernetes.io/change-cause: "Actualizar el puerto"
+```
+
+Aplicando el manifiesto y viendo el history del rollout
+
+```
+kubectl apply -f modulo7-deploy/deploy03.yaml
+kubectl rollout history deployment nginx-deployment
+```
+
+3. Tambie se podría aplicar la anotación directamente al deployment. __kubectl annotate deployment/nginx-deployment kubernetes.io/change-cause="image updated to 1.16.1"__
+
+### Ver los cambios hechos en un rollout
+
+```
+kubectl rollout history deployment nginx-deployment --revision=3
+```
+
+### HACIENDO UN ROLLBACK
+
+Un rollback teoriacamente se puede hacer es porque la aplicación no está ejecutando como esperabmos que se hiciera o bien sea inestable .
+
+Para este ejercicio se apicará una actlización al deploy pero colocando una imagen que no exista.
+así generando error al momento de crear el pod
+
+[modulo7-deploy/deploy04.yaml](KubernetesDePrincipianteAExperto/modulo7-deploy/deploy04.yaml)
+
+```
+kubectl apply -f modulo7-deploy/deploy04.yaml
+kubectl get pods
+```
+
+    NAME                                READY   STATUS         RESTARTS   AGE
+    nginx-deployment-68fd89c797-d2wx2   1/1     Running        0          13m
+    nginx-deployment-68fd89c797-sv46c   1/1     Running        0          13m
+    nginx-deployment-68fd89c797-wtw5h   1/1     Running        0          13m
+    nginx-deployment-7d448bf6c8-ff4x4   0/1     ErrImagePull   0          3m14s
+
+Para volver a un estado anterior
+```
+kubectl rollout undo deployment nginx-deployment --to-revision=3
+```
