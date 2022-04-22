@@ -192,4 +192,94 @@ kubectl logs doscont -c cont1
 Es metada que se le aplica a los pods, ayuda a indenticar , estois van dentro de la metadata
 
 
-## Módulo 
+## Módulo 6 - ReplicaSets
+
+### Que es un ReplicaSet
+Un ReplicaSet se define con campos, incluyendo un selector que indica cómo identificar a los Pods que puede adquirir, un número de réplicas indicando cuántos Pods debería gestionar, y una plantilla pod especificando los datos de los nuevos Pods que debería crear para conseguir el número de réplicas esperado. Un ReplicaSet alcanza entonces su propósito mediante la creación y eliminación de los Pods que sea necesario para alcanzar el número esperado. Cuando un ReplicaSet necesita crear nuevos Pods, utiliza su plantilla Pod.
+
+El enlace que un ReplicaSet tiene hacia sus Pods es a través del campo del Pod denominado metadata.ownerReferences, el cual indica qué recurso es el propietario del objeto actual. Todos los Pods adquiridos por un ReplicaSet tienen su propia información de identificación del ReplicaSet en su campo ownerReferences. Y es a través de este enlace cómo el ReplicaSet conoce el estado de los Pods que está gestionando y actúa en consecuencia.
+
+Un ReplicaSet garantiza que un número específico de réplicas de un pod se está ejecutando en todo momento. Sin embargo, un Deployment es un concepto de más alto nivel que gestiona ReplicaSets y proporciona actualizaciones de forma declarativa de los Pods junto con muchas otras características útiles. Por lo tanto, se recomienda el uso de Deployments en vez del uso directo de ReplicaSets, a no ser que se necesite una orquestración personalizada de actualización o no se necesite las actualizaciones en absoluto.
+
+En realidad, esto quiere decir que puede que nunca necesites manipular los objetos ReplicaSet: en vez de ello, usa un Deployment, y define tu aplicación en la sección spec.
+
+[Más información de ReplicaSets](https://kubernetes.io/es/docs/concepts/workloads/controllers/replicaset/)
+
+[Ejemplo-RS](modulo6-rs/rs-01.yaml)
+
+```
+kubectl apply -f modulo6-rs/rs-01.yaml
+kubectl describe rs/rs-frontend
+kubectl get po -l tier=frontend
+```
+
+Se puede actulizar el archivo y volver aplicarlo y va a realizar esa configuración sobre los pods estabalecidos
+
+Para saber quien es el dueño (owner) de un pod, podemos generar información del pod con los parámetros -o yaml
+
+```
+kubectl get po rs-frontend-xt7jr -o yaml > modulo6-rs/informacionPod1.yaml
+```
+[modulo6/informacionPod1.yaml](modulo6-rs/informacionPod1.yaml)
+
+
+a consultar el archivo generado podemos encontrar en la parte de la metada la si
+
+```
+metadata:
+  creationTimestamp: "2022-04-21T22:29:02Z"
+  generateName: rs-frontend-
+  labels:
+    tier: frontend
+  name: rs-frontend-xt7jr
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: rs-frontend
+    uid: 60b36c25-41c4-462f-b213-392671eee269
+
+```
+El campo uid especifica quien es el owner, esto se puede validar haciendo un get rs rs-frontend -o yaml
+
+_Nota: En caso que un pod no tenga de tenga ownerReference pero tenga el mismo label de un RS, el RS los hereda, no importa que sean del mismo tipo_
+
+### Asignar un label a un pod existente.
+
+```
+kubectl label pod pruebapod1 tier=frontend
+```
+
+### Validar la nota anterior 
+1. creamos una archivo yaml [modulo6-rs/rs-02.yaml](modulo6-rs/rs-02.yaml) este manifiesto es de nuevo RS
+2. Creamos un pod manualmente.
+    ```
+    kubectl run pruebapod1 --image=nginx:alpine
+    kubectl label pod pruebapod1 tier=frontend
+    ```
+3. Validamos con un get pruebapod1 -o yaml que este no tenta metada.ownerReferences
+
+4. Aplicamos el manifiesto 
+```
+kubectl apply -f modulo6-rs/rs-02.yaml
+```
+
+5. Ahora volvemos hacer un get prubeapod -o yaml y veremos que se agregó metada.ownerReferences
+
+```
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: rs-frontend-2
+    uid: a3dcf3ca-576a-4ccd-bac0-e8a43fda71a2
+```
+
+**NOTA: Por este motivo no se deberia crear pods de forma manual **
+
+
+### Problemas de ReplicaSets.
+En caso de realizar un cambio del manifiesto en la parte de los template ejemplo se cambia la versión de la imagen y aplicamos el manifiesto no va a ocurrir nada. Esto porque el RS solo mira que se cumpla la cantidad de pods solicitados. Excepto a que se force eliminando uno de los pods.

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # modifica las réplicas según tu caso de uso
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  # Desde este pundo inica la configuracion del pod
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3
+
+
