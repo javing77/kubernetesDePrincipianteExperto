@@ -421,3 +421,78 @@ Para volver a un estado anterior
 ```
 kubectl rollout undo deployment nginx-deployment --to-revision=3
 ```
+
+# Módulo 8 Servicios
+es el objeto de la API de Kubernetes que describe cómo se accede a las aplicaciones, tal como un conjunto de Pods, y que puede describir puertos y balanceadores de carga.
+
+Con Kubernetes no necesitas modificar tu aplicación para que utilice un mecanismo de descubrimiento de servicios desconocido. Kubernetes le otorga a sus Pods su propia dirección IP y un nombre DNS para un conjunto de Pods, y puede balancear la carga entre ellos.
+Motivación
+[Más información] (https://kubernetes.io/docs/concepts/services-networking/service/)
+
+
+Crear un archivo que contenga un deployment y simultaneamente el Servicie 
+
+[modulo8-svc/svc-01.yaml](./KubernetesDePrincipianteAExperto/modulo8-svc/svc-01.yaml)
+
+Aplicar el manifiesto:
+
+```
+kubectl apply -f modulo8-svc/svc-01.yaml
+kubectl get services
+kubectl get endpoints
+```
+
+### Ejecutando un pod temporar
+```
+kubectl run --rm -ti podtest3 --image=nginx:alpine -- sh
+```
+
+### Tipo de Servicios : ClusterIp
+Es una ip virtual que kubernetes asingna al servicio y kubernetes se encarga que sea fija,
+esta ip es interna. (solo absesible dentro del cluster).
+
+Para definir el tipo de servicio se hace dentro del spec  "spec.type: CluserIp"
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  labels:
+    app: front
+spec:
+  type: CluserIp
+  selector:
+    app: front-nginx
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 80
+```
+
+### Tipo de Servicios : NodePort
+Permite exponer el servicio por fuera del Nodo, una vez creado un servicio NodePort.
+User  -----> Nodeport ------>   ClusterIp    ----> PODs
+
+[Mas Información](https://kubernetes.io/docs/concepts/services-networking/service/)
+
+[modulo8-svc/svc-np-03.yaml](KubernetesDePrincipianteAExperto/modulo8-svc/svc-np-03.yaml)
+
+Aplicar el manifiesto:
+
+```
+kubectl apply -f modulo8-svc/svc-np-03.yaml
+```
+
+Para accder al recurso expuesto se hace a través de la ip del node de minikube esto funciona solo dentro de la maquina virtual.
+```
+kubectl get nodes -o wide
+```
+
+Para exponer el servicio por fuera de la máquina virtual
+```
+kubectl port-forward --address 0.0.0.0 service/my-service-backed 30227:8080
+```
+
+### Tipo de Servicios : LoadBalancer
+Crea un servicio de Balanceador externo usando plataformas como AWS, AZUERE, GCP
