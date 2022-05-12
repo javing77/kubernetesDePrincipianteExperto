@@ -496,3 +496,54 @@ kubectl port-forward --address 0.0.0.0 service/my-service-backed 30227:8080
 
 ### Tipo de Servicios : LoadBalancer
 Crea un servicio de Balanceador externo usando plataformas como AWS, AZUERE, GCP
+
+# Módulo 9 - Goland
+
+1. Crear el achivo main.go el cual va a ser un webservice rest básico en golang
+[main.go](./KubernetesDePrincipianteAExperto/modulo9/backend/main.go)
+
+2. Descargar la imagen de golang desde docker
+```
+docker pull golang
+```
+
+3. Crear un container que  va a disponibilizar el servicio : Esto es para la fase de desarrollo de la aplicación.
+
+```
+docker run --rm -dti -p 9090:9090 -v $PWD/modulo9/backend/:/go  --name gonlangsvc  golang bash
+```
+
+4. Accder al contenedor de docker
+```
+docker ps 
+docker exec -ti id_contenedor bash
+```
+
+5. Crear una RESTAPI con GO
+[main.go](./KubernetesDePrincipianteAExperto/modulo9/backend/main.go)
+
+6. Crear un Dockerfile que construya una imagen para correr el main.go
+[Dockerfile](./KubernetesDePrincipianteAExperto/modulo9/backend/Dockerfile)
+
+7. Construir la imagen
+```
+docker build -t javing77/k8s-hands-on-golang .
+docker push javing77/k8s-hands-on-golang
+```
+
+9. Correr la imagen previamente create
+```
+docker run -d -p 9090:9090 --name golang-hands-on k8s-hands-on-golang
+```
+
+10. Validar que el servicio esté ejecutandose correctamente.
+```
+curl localhost:9090
+```
+
+11. Eliminar el contenedor creado
+```
+docker rm -f golang-hands-on
+``` 
+
+12. Crear el manifiesto para la imagen 
