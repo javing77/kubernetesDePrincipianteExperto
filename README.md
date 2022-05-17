@@ -547,3 +547,96 @@ docker rm -f golang-hands-on
 ``` 
 
 12. Crear el manifiesto para la imagen 
+
+# Modulo 10 Namespace
+ ![Namespaces](KubernetesDePrincipianteAExperto/modulo10/namespaces.png)
+
+
+Brinda un scope 'Limite' de objectos (Deploy, SVC, PO, RS) entre otros objetos, Ejemplo un ambiente DEV, QAD dentro un mismo cluster pero separción logica.
+
+Namespaces are a way to divide cluster resources between multiple users
+
+
+  [Mas Informacion](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+
+
+Obtener namespace  
+
+```
+kubectl get namespaces
+```
+
+Obtener pods por namespaces
+
+```
+kubectl get  pods --namespace default
+```
+
+Mostrar los objetos que tiene un namespace 
+```
+kubectl get namespaces
+kubectl get all -n lfs158
+```
+
+## Creando un namespace
+1. Linea de comando 
+
+```
+kubect create namespace prueba1
+```
+
+2. Por yaml
+
+[namespace.yaml](./KubernetesDePrincipianteAExperto/modulo10/namespace.yaml)
+
+```
+kubectl apply -f modulo10/namespace.yaml
+kubectl get namespaces --show-labels
+```
+
+3. Creando un pod dentro del namespace
+```
+kubectl run  pruebanamespace --image=nginx:alpine --namespace kubernetes-de-principiante-a-experto
+kubectl get po --namespace kubernetes-de-principiante-a-experto
+```
+
+## Creando namespaces con yaml multiples ambientes
+[namespaces2](./KubernetesDePrincipianteAExperto/modulo10/namespace02.yaml)
+
+```
+kubectl apply -f modulo10/namespace02.yaml
+```
+
+## Crear un NS, DEPLOY y SVC  : Valindando como funcionan los DNS
+
+Los namespaces se agregan en metadata.namespace de los diferentes objetos
+[ns-dns-03.yaml](./KubernetesDePrincipianteAExperto/modulo10/ns-dns-03.yaml)
+
+### Consumiendo un servicio desde un pod que no está en el mismo namespace
+
+Se debe pasar el FQDN (Fully Qualified Domain Name)
+
+```
+curl nameSvc.nameNS.svc.cluster.local
+curl go-backed-hand-on.ci.svc.cluster.local:9090
+```
+
+## Trabajando con el context
+
+Trabajar con contextos nos ahorra estar pasando los parametros -ns para consultar los diferentes Objectos
+
+1. Validar el contexto en el que nos encontramos.
+```
+kubectl config current-context
+kubectl config view
+```
+
+2. Crear un contexto , para esto hay que pasar parámetros como NombreContexto, namespace  y el usuario. Para los datos se pueden usar los datos generados por los anteriores comandos
+```
+kubectl config set-context ci-context --namespace=ci --cluster=minikube --user=minikube
+```
+
+3. Cambiarnos de contexto.
+```
+kubectl config use-context ci-context
+```
