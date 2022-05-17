@@ -640,3 +640,48 @@ kubectl config set-context ci-context --namespace=ci --cluster=minikube --user=m
 ```
 kubectl config use-context ci-context
 ```
+
+# Modulo11: Limites 
+## Limitar el uso de la Ram
+![Linites&Requests](./KubernetesDePrincipianteAExperto/modulo11/Limites.png)
+
+1. Ejemplo de uso de limites.
+
+[LimitRam]('./KubernetesDePrincipianteAExperto/modulo11/limites.yaml')
+
+2. Cuando un deploy solicita una cantidad de recursos, pero este se eleva mas de los establecidos, los pod se reinician para ver si estos pueden bajar.
+
+[LimitRam2]('./KubernetesDePrincipianteAExperto/modulo11/limitesRam2.yaml')
+
+3. Cuando un deploy solicita mas recursos de los que se cuentan en un node este quedaran en Pending pues no tiene recursos suficiendes para 
+inicializarlo
+
+[LimitRam]('./KubernetesDePrincipianteAExperto/modulo11/limitessRam3.yaml')
+
+Para visualizar que esta causnado el error podemos hacerlo a través de un describe
+
+```
+kubectl describe po memory-demo
+```
+## Limitar uso de CPU
+
+1. Adiferencia de los limites en ram, los pod no se les permite  pasar el limite establecido de cpu por esta razón no se reinician.
+[LimitCpu](./KubernetesDePrincipianteAExperto/modulo11/limit-cpu.yaml)
+
+Esto se puede validar usuando el describe del nodo
+```
+kubectl describe node minikube
+```
+
+El describe del node tambien en la parte de Capacity.cpu nos indica cuanta cpu pdemos contar.
+
+2. Cuando se solicta la creación de un pod con mas cpu de la requerida. tampoco es creado.
+[LimitCPU2](./KubernetesDePrincipianteAExperto/modulo11/limit-cpu2.yaml)
+
+## QoS
+Es una propiedad que se le asigna a un pod
+
+
+    Guaranteed  -> Cuando el limit es igual al request
+    Burstable   -> Cuando el limit es mayor al request
+    BestEffort  -> Cuando no se define ni Guaranteed ni Burstable : Son los mas peligrosos debido a que no tienen limites.
