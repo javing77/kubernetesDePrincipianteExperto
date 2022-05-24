@@ -685,3 +685,23 @@ Es una propiedad que se le asigna a un pod
     Guaranteed  -> Cuando el limit es igual al request
     Burstable   -> Cuando el limit es mayor al request
     BestEffort  -> Cuando no se define ni Guaranteed ni Burstable : Son los mas peligrosos debido a que no tienen limites.
+
+
+# Modulo 12: LimitRange - Aprender a controlar el uso de recursos a Nivel de objetos
+
+Es un objeto que permite controlar limites a nivel de objetos, colocando limites por defectos. El limitRange opera en los objetos del namespace donde ha sido creado.
+
+crendo un Namespace y un LimintRange:
+[limit-range-mem-cpu](./KubernetesDePrincipianteAExperto/modulo12/limitrange-mem.yaml)
+
+```
+kubectl get limitrange -n dev-kpe
+```
+
+Describir el recurso para ver los limites que contienen este limitrange, junto con un container pero a este no se le asinga limites
+```
+kubectl describe limitrange mem-limit-range -n dev-kpe
+```
+
+
+
