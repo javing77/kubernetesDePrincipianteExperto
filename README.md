@@ -689,6 +689,18 @@ Es una propiedad que se le asigna a un pod
 
 # Modulo 12: LimitRange - Aprender a controlar el uso de recursos a Nivel de objetos
 
+Aplicar restricciones de asignación de recursos, los administradores de clústeres se aseguran del cumplimiento del consumo de recursos por espacio de Namespace
+
+Un LimitRange permite aplicar las siguientes políticas:
+    Imponer restricciones de requisitos de recursos a Pods o Contenedores por Namespace.
+    Imponer las limitaciones de recursos mínimas/máximas para Pods o Contenedores dentro de un Namespace.
+    Especificar requisitos y límites de recursos predeterminados para Pods o Contenedores de un Namespace.
+    Imponer una relación de proporción entre los requisitos y el límite de un recurso.
+    Imponer el cumplimiento de las demandas de almacenamiento mínimo/máximo para Solicitudes de Volúmenes Persistentes.
+
+[Más Información](https://kubernetes.io/docs/concepts/policy/limit-range//)
+
+
 Es un objeto que permite controlar limites a nivel de objetos, colocando limites por defectos. El limitRange opera en los objetos del namespace donde ha sido creado.
 
 crendo un Namespace y un LimintRange:
@@ -703,5 +715,35 @@ Describir el recurso para ver los limites que contienen este limitrange, junto c
 kubectl describe limitrange mem-limit-range -n dev-kpe
 ```
 
+# Modulo 13: ResourceQuota
+
+ResourceQuota vs Limit Range.
+
+![ResourceQuota](./KubernetesDePrincipianteAExperto/modulo13/ResourceQuota.png)
+
+[Más Información](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+
+[Archivo ResourceQuta](./KubernetesDePrincipianteAExperto/modulo13/ResourceQuota.yaml)
 
 
+
+```
+kubectl apply -f KubernetesDePrincipianteAExperto/modulo13/ResourceQuota.yaml
+kubectl get quota -n dev-kpe
+```
+
+## Limitar el numero de pods
+
+Agregar el spec.hard.pod: "2"
+
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-demo
+  namespace: doscont-quota
+spec:
+  hard:
+    pods: "2"
+```
+[Más información](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-pod-namespace/)
