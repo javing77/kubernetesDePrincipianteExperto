@@ -2,11 +2,6 @@
 
 _Apuntes del curso UDEMY [Kubernetes, de principiante a experto](https://www.udemy.com/course/kubernetes-de-principiante-a-experto/)  desde hace 2 años no recibe actualización el material. :(  vamos a ver como nos va_
 
-### Fallas
-1. Módulo 5 video No. 24 no se puede crear un pod como explica en el video.
-2. No se puede conectar a los puertos del pod creado solo por la linea de comando, los puertos no quedan expuestos incluso dentro del mismo host. Para esto se debe exponer un servicio en el cluster
-(un ingress para hacer que se vea por fuera del cluster )
-
 ## Módulo 1 
 ## Módulo 2
 ## Módulo 3
@@ -747,3 +742,16 @@ spec:
     pods: "2"
 ```
 [Más información](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-pod-namespace/)
+
+# Modulo 14 Health Checks & Probes
+
+![Probes](./KubernetesDePrincipianteAExperto/modulo14/Probes.png)
+
+Kubelet es el encargado de ejecutar liveness y readiness probes 'dignosticos' para saber sus respectivos estados. 
+Estos probes lo puede hacer por:
+* [comando](./KubernetesDePrincipianteAExperto/modulo14/liveness.yaml) -> Restorna un valor 0
+* [TCP](./KubernetesDePrincipianteAExperto/modulo14/liveness-tcp.yaml)     -> A un puerto
+* [HTTP](./KubernetesDePrincipianteAExperto/modulo14/liveness-http.yaml)    -> Petición http auna ruta y valida por códigos de respuesta.
+
+[Más información](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+
