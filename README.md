@@ -818,3 +818,74 @@ kubectl create configmap ngnix-folder --from-file=KubernetesDePrincipianteAExper
 ``` 
 
 ### ConfigMap con Manifiestos
+[Archivo](./KubernetesDePrincipianteAExperto/modulo15-env/configMaps/configMaEnv.yaml)
+
+# Módulo 16: Secrets
+
+Es similar es aun configMap pero es para almacenar datos sensibles (Contraseñas, Tokens, Key).
+Separando la configuración del  POD
+[Más información](https://kubernetes.io/docs/concepts/configuration/secret/)
+
+
+## Creando un secreto a través de comando
+
+Crear un archivo con los secretos
+[Archivo](ernetesDePrincipianteAExperto/modulo16-secrets/secret-files/secrets)
+
+```
+kubectl create secret generic mysecret --from-file=KubernetesDePrincipianteAExperto/modulo16-secrets/secret-files/secrets
+```
+
+Al hacer un describe no se ve el contenido del secreto.
+```
+kubectl describe secrets mysecret
+```
+
+Para ver el contenido de un secreto debe hacer con  -o yaml y en el campo data: se podran ver el nombre del archivo y el secreto en base64
+
+```
+kubectl get secrets mysecret -o yaml
+```
+
+Para decodificar este valor podemos hacer un 
+
+```
+echo c2VjcmV0bzE9aG9sYQpzZWNyZXQyPWFkaW9z | base64 --decode
+```
+
+Por eso de esta forma es insegura
+
+## Creando un secret desde manifiesto
+
+En un manifiesto cuando se hace del data se los valores de las llaves se deben colocar en base64
+
+[Secret](KubernetesDePrincipianteAExperto/modulo16-secrets/secrets01.yaml)
+
+Usando en campo stringData y no data no se utilizaran en base64
+
+## Como gestionar los secrets de fomra segura
+
+No se debería colocar en CVS (git) los secrets porque contiene información sensicle para eso podemos crear manifiestos con variables de ambiente.
+
+La siguiente solución a esto es un poco manual pero muy práctica. vamos a trabajar con el comando envsubst el cual busca en un archivo todo lo que parezca una variable y genera un nuevo archivo con los valores de ambiente del sistema
+
+1.  Crear variables de ambientes
+```
+export USER2=Pruebas
+export PWD2=PruebasPWD
+```
+
+2. Crear un manifiesto que tenga los valores de las llaves como variables de ambiente
+[SecretsEnv.yaml](KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnv.yaml)
+
+3. usar el comando envsubst quien recibe < el archivo con las llaves y hace la salida > de un nuevo archivo.
+```
+envsubst < KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnv.yaml > KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnvFinal.yaml
+```
+
+## Usando los secrets en un pod Vol
+[SecretsVol](KubernetesDePrincipianteAExperto/modulo16-secrets/secrets-vol.yaml)
+
+## Usando los secrets para que sean variables ambiente
+
+[SecretsEnvToPod](KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnvToPod.yaml)
