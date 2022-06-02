@@ -755,3 +755,66 @@ Estos probes lo puede hacer por:
 
 [Más información](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 
+# Módulo 15 : ConfigMaps & Environment Variables 
+Creando variables de ambientes usando manifiestos
+
+spec.containers.env.name y spec.containers.env.value
+[Variables](./KubernetesDePrincipianteAExperto/modulo15-env/env.yaml)
+
+Leyendo las definiciones  de un pod y dejandolas como variables de ambiente dentro del mismo
+
+spec.containers.env.name
+spec.containers.env.valueFrom
+spec.containers.env.valueFrom.fieldRef
+spec.containers.env.valueFrom.fieldRef.fieldPath
+
+[VariablesRef](./KubernetesDePrincipianteAExperto/modulo15-env/ref.yaml)
+
+```
+kubectl exec -ti dapi-envars-fieldref -- sh
+```
+
+Una vez adentro del pod ya podemos ver las variables
+
+
+```
+  env
+  echo $MY_POD_SERVICE_ACCOUNT
+```
+
+## ConfigMap
+![ConfigMap](./KubernetesDePrincipianteAExperto/modulo15-env/configmap.png)
+[Más Información](https://kubernetes.io/docs/concepts/configuration/configmap/)
+
+Es un objeto utilizado para almacenar datos datos no confidencial, en formato Key: Value
+El objetivo de las configmap es separar las configuraciones de las aplicaciones de los pods
+
+Creando un configMap desde un archivo
+
+[Archivo ConfigMap](./KubernetesDePrincipianteAExperto/modulo15-env/configMaps/configMapNgnix.conf)
+
+``` 
+kubectl create configmap ngnix-config --from-file=KubernetesDePrincipianteAExperto/modulo15-env/configMapNgnix.conf
+``` 
+
+Para obtener los configMaps creados
+
+```
+kubectl get cm
+```
+
+```
+kubectl describe cm ngnix-config
+```
+
+Tambien se puede asignar los contenidos de una carpeta a un configMap, Para este caso chrear un
+ºº
+```
+echo HolaMundo > KubernetesDePrincipianteAExperto/modulo15-env/configMaps/index.html
+``` 
+
+``` 
+kubectl create configmap ngnix-folder --from-file=KubernetesDePrincipianteAExperto/modulo15-env/
+``` 
+
+### ConfigMap con Manifiestos
