@@ -889,3 +889,37 @@ envsubst < KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnv.yaml > K
 ## Usando los secrets para que sean variables ambiente
 
 [SecretsEnvToPod](KubernetesDePrincipianteAExperto/modulo16-secrets/secretsEnvToPod.yaml)
+
+# Módulo 17 y 18: Volumes
+
+[Más Información](https://kubernetes.io/docs/concepts/storage/volumes/)
+
+[EmptyDir](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) -> Información para compartir entre containers de un mismo pod. Si un container muere y se recrea uno nuevo la información persiste. Pero en caso que el pod se elimine, la información (Volumen) es eliminada junto con el pod.
+
+[EmptyDir.yaml](KubernetesDePrincipianteAExperto/modulo17-volmunes/emptydir.yaml)
+```
+kubectl apply -f KubernetesDePrincipianteAExperto/modulo17-volmunes/emptydir.yaml 
+```
+
+Usualmente se usa como caché
+
+
+[hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath)
+Un volumen dentro del Nodo el cual es compartido en los pod. Así se elimine el Pod el volumen no se ve afectado. Generalmente hostPath es usado para temas de desarrollo.
+![hostPath](./KubernetesDePrincipianteAExperto/modulo17-volmunes/hostpath.png)
+
+[PV - PVC]
+PV -> Persitent Volume
+PVC -> Persient Volume Claim
+
+## Creando un PV
+[Más Información](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
+
+El pv es el encagargado de crear los discos.
+
+```
+kubectl apply -f KubernetesDePrincipianteAExperto/modulo17-volmunes/pv.yaml
+```
+
+PVC : Reclamar el espacio creado en PV
+
