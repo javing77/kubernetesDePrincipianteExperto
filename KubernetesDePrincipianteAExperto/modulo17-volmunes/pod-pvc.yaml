@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume2
+  labels:
+    mysql: ready
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Users/javing77/Documentos/cursos/Kubernetes/kubernetesDePrincipianteExperto/KubernetesDePrincipianteAExperto/modulo17-volmunes/pv"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  selector:
+    matchLabels:
+      mysql: ready
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  labels:
+    app: front 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "password"
+        volumeMounts:
+        - name: mysql-data-pvc
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data-pvc
+        persistentVolumeClaim:
+          claimName: mysql-data

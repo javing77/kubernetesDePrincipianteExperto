@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Users/javing77/Documentos/cursos/Kubernetes/kubernetesDePrincipianteExperto/KubernetesDePrincipianteAExperto/modulo17-volmunes/pv"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume2
+  labels:
+    mysql: ready
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Users/javing77/Documentos/cursos/Kubernetes/kubernetesDePrincipianteExperto/KubernetesDePrincipianteAExperto/modulo17-volmunes/"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pvc-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  selector:
+    matchLabels:
+      mysql: ready
+

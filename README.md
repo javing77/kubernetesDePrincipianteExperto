@@ -923,3 +923,16 @@ kubectl apply -f KubernetesDePrincipianteAExperto/modulo17-volmunes/pv.yaml
 
 PVC : Reclamar el espacio creado en PV
 
+```
+kubectl get pv --show-labels
+```
+
+## Montando un pvc en POD
+
+[PodUsandoPVC](KubernetesDePrincipianteAExperto/modulo17-volmunes/pod-pvc.yaml)
+
+Para editar alguna propiedad de un PVC podemos usar el comando kubectl edit
+
+```
+kubectl edit pvc mypvc
+```
