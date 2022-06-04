@@ -936,3 +936,139 @@ Para editar alguna propiedad de un PVC podemos usar el comando kubectl edit
 ```
 kubectl edit pvc mypvc
 ```
+
+# Módulo 19: RBAC
+
+Se trabajará con la creación de roles y bindings usando certificados. 
+
+Ver el certifado de RBAC con el que estamos trabajando
+
+``` 
+kubectl config view 
+```
+
+1. Crear una llave privada
+```
+openssl genrsa -out jcisneros.key 2048
+```
+
+2. Generar un CSR (Certificate Signing Request)
+```
+openssl req -new -key jcisneros.key -out jcisneros.csr -subj "/CN=javier/O=dev"
+```
+
+3. Enviar y Solicitar la firma del CSR
+```
+openssl x509 -req -in jcisneros.csr -CA /home/javing77/.minikube/ca.crt -CAkey /home/javing77/.minikube/ca.key -CAcreateserial -out jcisneros.crt -days 365
+```
+
+4. Validar la firma del CSR
+```
+openssl verify -CAfile /home/javing77/.minikube/ca.crt jcisneros.crt
+```
+
+5. Ver detalles del crt
+```
+openssl x509 -in jcisneros.crt -text -noout
+```
+
+6. El crt se debe enviar al usuario y este lo utilizará para conectar
+
+7. Ver el usuario actual de kubernetes
+```
+kubectl config current-context
+``` 
+
+8. Obctener los contexto 
+```
+kubectl config get-contexts
+```
+
+
+## Esto debería ir un script
+10. crear y conectar a un cluster de minikube usando el certificado de RBAC
+
+10.1. Obtener informaciön del cluster
+```
+kubectl cluster-info
+```
+
+10.2. Crear un docker container. Validar que queden en la misma red. Para esto puede usar el comando docker network ls
+  
+  ```
+docker run -ti -v $PWD:/test -w /test -v /home/javing77/.minikube/ca.crt:/test/ca.crt -v /usr/local/bin/kubectl:/usr/bin/kubectl --network=minikube  alpine sh  
+```
+
+10.3. Crear un cluster y conectarlo al cluster de minikube.
+  
+  ```
+  kubectl config set-cluster minikube --server=https://192.168.49.2:8443 --certificate-authority=/test/ca.crt
+  kubectl config view
+  ```
+10.4 Agregar las credenciales.
+  
+  ```
+  kubectl config set-credentials javier --client-certificate=/test/jcisneros.crt --client-key=/test/jcisneros.key
+  kubectl config view
+  ```
+
+10.5 Configurar el contexto.
+    
+    ```
+    kubectl config set-context minikube --cluster=minikube --user=javier
+    kubectl config use-context minikube
+    ```
+
+Resumén Script:
+```
+kubectl config set-cluster minikube --server=https://192.168.49.2:8443 --certificate-authority=ca.crt
+kubectl config set-credentials javier --client-certificate=jcisneros.crt --client-key=jcisneros.key
+kubectl config set-context javier --cluster=minikube --user=javier
+kubectl config use-context javier
+kubectl config get-contexts
+ ```
+
+ **Recodar - Cambio de Contextos:** kubectl config use-context minikube
+ **Recodar - Eliminar un Contexto:** kubectl config unset contexts.minikubeDev
+
+
+11. Validar que minikube ten el RBAC habilitado
+
+```
+kubectl cluster-info dump | grep authorization-mode
+```
+## Creaundo un ROL y un BINDING
+
+Verbos 
+![Verbos](./KubernetesDePrincipianteAExperto/modulo19-rbac/verbs.png)
+
+
+[rol.yaml](KubernetesDePrincipianteAExperto/modulo19-rbac/rol.yaml)
+
+```
+kubectl apply -f rol.yaml
+kubectl get roles
+``` 
+
+ROLE BINGING:
+[role-binding.yaml](KubernetesDePrincipianteAExperto/modulo19-rbac/role-binding.yaml)
+```
+kubectl apply -f KubernetesDePrincipianteAExperto/modulo19-rbac/role-binding.yaml
+kubectl get rolebinding
+```
+
+Al hacerle un describe al rolebinding podemos ver que el rolebinding tiene una propiedad que es: Subject y esta nos dice que usuario tiene asignado el rolebinding.
+
+```
+kubectl describe rolebinding read-pods
+```
+
+Con esto cuando se use el contexto de javier ya podrá hacer consultas sobres los pods en default.
+
+## Volviendo un usuario administrador
+
+Ver los clusterole que existe.
+
+```
+kubectl get clusterroles
+```
