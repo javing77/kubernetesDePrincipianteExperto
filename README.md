@@ -1072,3 +1072,76 @@ Ver los clusterole que existe.
 ```
 kubectl get clusterroles
 ```
+
+# Módulo 20: ServiceAccounts
+
+Siempre se crearáun un ServiceAccount por defecto para cada Namespace que se crea. El cual está asociado a un token.
+
+Mostrar nuestros servicesaccount
+```
+kubectl get sa
+kubectl describe sa default
+```
+
+Para ver los secrets que tiene un serviceaccount
+```
+kubectl get secret
+```
+
+## Creando un serviceaccount
+
+[sa.yaml](KubernetesDePrincipianteAExperto/modulo20-serviceaccounts/sa.yaml)
+
+```
+kubectl apply -f sa.yaml
+```
+
+Para el siguiente ejercicio se crearan dos pods. se accederá a uno de los pods, se instalará el paquete curl y se le hará una petición a la API de kubernetes. para saber cual es la ip hacer un **kubectl get svc**
+
+[nginx01.yaml](KubernetesDePrincipianteAExperto/modulo20-serviceaccounts/nginx01.yaml)
+
+```
+kubectl apply -f nginx01.yaml
+```
+
+Ahora ingresar al pod y hacer una petición a la API de kubernetes.
+
+```
+kubectl exec -it nginxsa1 -- sh
+apk add curl
+curl https://10.96.0.1/api/v1/namespaces/default/pods --insecure
+```
+
+**Nota:** Cuando un pod es creado en este se crea un token que se le asigna al pod. 
+```
+cat /var/run/secrets/kubernetes.io/serviceaccount/token
+```
+
+La respuesta por ahora es permiso deneegado.
+
+## Enviando el token en la petición
+
+1. Almacenar el resultado del token en una variable
+```
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+```
+2. Hacer la petición
+```
+curl -H "Authorization: Bearer ${TOKEN}" https://10.96.0.1/api/v1 --insecure
+```
+Este token tiene restricciones, aunque nos dió una respuesta
+
+## Crear un deployment y que este use nuestro ServiceAccount
+
+[deplosa.yaml](KubernetesDePrincipianteAExperto/modulo20-serviceaccounts/deplosa.yaml)
+
+```
+kubectl apply -f deplosa.yaml
+```
+
+Entrar en el pod y hacer una petición a la API de kubernetes.
+
+```
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -H "Authorization: Bearer ${TOKEN}" https://10.96.0.1/api/v1 --insecure
+```
