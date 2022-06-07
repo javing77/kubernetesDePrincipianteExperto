@@ -1145,3 +1145,6 @@ Entrar en el pod y hacer una petición a la API de kubernetes.
 TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 curl -H "Authorization: Bearer ${TOKEN}" https://10.96.0.1/api/v1 --insecure
 ```
+
+# Módulo 21: Ingress
+
