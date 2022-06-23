@@ -189,6 +189,7 @@ Es metada que se le aplica a los pods, ayuda a indenticar , estois van dentro de
 
 ## Módulo 6 - ReplicaSets
 
+
 ### Que es un ReplicaSet
 Un ReplicaSet se define con campos, incluyendo un selector que indica cómo identificar a los Pods que puede adquirir, un número de réplicas indicando cuántos Pods debería gestionar, y una plantilla pod especificando los datos de los nuevos Pods que debería crear para conseguir el número de réplicas esperado. Un ReplicaSet alcanza entonces su propósito mediante la creación y eliminación de los Pods que sea necesario para alcanzar el número esperado. Cuando un ReplicaSet necesita crear nuevos Pods, utiliza su plantilla Pod.
 
@@ -197,6 +198,8 @@ El enlace que un ReplicaSet tiene hacia sus Pods es a través del campo del Pod 
 Un ReplicaSet garantiza que un número específico de réplicas de un pod se está ejecutando en todo momento. Sin embargo, un Deployment es un concepto de más alto nivel que gestiona ReplicaSets y proporciona actualizaciones de forma declarativa de los Pods junto con muchas otras características útiles. Por lo tanto, se recomienda el uso de Deployments en vez del uso directo de ReplicaSets, a no ser que se necesite una orquestración personalizada de actualización o no se necesite las actualizaciones en absoluto.
 
 En realidad, esto quiere decir que puede que nunca necesites manipular los objetos ReplicaSet: en vez de ello, usa un Deployment, y define tu aplicación en la sección spec.
+
+![RS](./KubernetesDePrincipianteAExperto/modulo6-rs/RS.png)
 
 [Más información de ReplicaSets](https://kubernetes.io/es/docs/concepts/workloads/controllers/replicaset/)
 
@@ -241,6 +244,13 @@ El campo uid especifica quien es el owner, esto se puede validar haciendo un get
 
 _Nota: En caso que un pod no tenga de tenga ownerReference pero tenga el mismo label de un RS, el RS los hereda, no importa que sean del mismo tipo_
 
+### Escalar manualmente un ReplicaSet
+
+  
+  ```
+  kubectl scale  rs rs-frontend --replicas=3
+  ```
+
 ### Asignar un label a un pod existente.
 
 ```
@@ -273,6 +283,7 @@ kubectl apply -f modulo6-rs/rs-02.yaml
     name: rs-frontend-2
     uid: a3dcf3ca-576a-4ccd-bac0-e8a43fda71a2
 ```
+
 
 **NOTA: Por este motivo no se deberia crear pods de forma manual **
 
@@ -344,6 +355,7 @@ Obtener mas información del proceso del deployement
 kubectl describe deployment nginx-deployment
 ```
 
+![RollOut](./KubernetesDePrincipianteAExperto/modulo6-rs/RS.png)
 [Más Información de RollOut](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
 
 ### Ver los rollout hechos a un deployment
